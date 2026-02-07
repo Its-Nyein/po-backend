@@ -13,10 +13,11 @@ func NewNotificationService(repo *repositories.NotificationRepository) *Notifica
 	return &NotificationService{Repo: repo}
 }
 
-func (s *NotificationService) Create(notiType, content string, userID, postID uint) (*models.Notification, error) {
+func (s *NotificationService) Create(notiType, content string, actorID, userID uint, postID *uint) (*models.Notification, error) {
 	noti := &models.Notification{
 		Type:    notiType,
 		Content: content,
+		ActorID: actorID,
 		UserID:  userID,
 		PostID:  postID,
 	}
@@ -26,8 +27,8 @@ func (s *NotificationService) Create(notiType, content string, userID, postID ui
 	return noti, nil
 }
 
-func (s *NotificationService) GetByPostOwner(userID uint) ([]models.Notification, error) {
-	return s.Repo.GetByPostOwner(userID)
+func (s *NotificationService) GetByUserID(userID uint) ([]models.Notification, error) {
+	return s.Repo.GetByUserID(userID)
 }
 
 func (s *NotificationService) MarkAllRead(userID uint) error {

@@ -18,20 +18,18 @@ func (r *NotificationRepository) Create(notification *models.Notification) error
 	return r.DB.Create(notification).Error
 }
 
-func (r *NotificationRepository) GetByPostOwner(userID uint) ([]models.Notification, error) {
+func (r *NotificationRepository) GetByUserID(userID uint) ([]models.Notification, error) {
 	var notifications []models.Notification
-	err := r.DB.Preload("User").
-		Joins("JOIN posts ON posts.id = notifications.post_id").
-		Where("posts.user_id = ?", userID).
-		Order("notifications.created_at DESC").
+	err := r.DB.Preload("Actor").Preload("Post").
+		Where("user_id = ?", userID).
+		Order("created_at DESC").
 		Find(&notifications).Error
 	return notifications, err
 }
 
 func (r *NotificationRepository) MarkAllRead(userID uint) error {
 	return r.DB.Model(&models.Notification{}).
-		Joins("JOIN posts ON posts.id = notifications.post_id").
-		Where("posts.user_id = ?", userID).
+		Where("user_id = ?", userID).
 		Update("read", true).Error
 }
 

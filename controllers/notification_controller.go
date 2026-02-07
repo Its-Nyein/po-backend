@@ -19,7 +19,7 @@ func NewNotificationController(service *services.NotificationService) *Notificat
 
 func (ctrl *NotificationController) GetNotifications(c *echo.Context) error {
 	userID := c.Get("userID").(uint)
-	notifications, err := ctrl.Service.GetByPostOwner(userID)
+	notifications, err := ctrl.Service.GetByUserID(userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

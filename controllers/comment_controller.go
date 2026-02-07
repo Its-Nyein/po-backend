@@ -60,7 +60,8 @@ func (ctrl *CommentController) CreateComment(c *echo.Context) error {
 		if user != nil {
 			content = user.Name + " commented on your post"
 		}
-		if _, err := ctrl.NotiService.Create("comment", content, userID, req.PostID); err != nil {
+		pid := req.PostID
+		if _, err := ctrl.NotiService.Create("comment", content, userID, post.UserID, &pid); err != nil {
 			log.Printf("Failed to create notification: %v", err)
 		}
 		utilities.SendWebSocketMessage(post.UserID, "notis")

@@ -31,7 +31,7 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	postCtrl := controllers.NewPostController(postService, followService)
 	commentCtrl := controllers.NewCommentController(commentService, postService, notiService, userService)
 	likeCtrl := controllers.NewLikeController(likeService, postService, commentService, notiService, userService)
-	followCtrl := controllers.NewFollowController(followService)
+	followCtrl := controllers.NewFollowController(followService, notiService, userService)
 	notiCtrl := controllers.NewNotificationController(notiService)
 
 	api.GET("/users", userCtrl.GetUsers)

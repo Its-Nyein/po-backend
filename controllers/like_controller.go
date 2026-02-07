@@ -54,7 +54,8 @@ func (ctrl *LikeController) LikePost(c *echo.Context) error {
 		if user != nil {
 			content = user.Name + " liked your post"
 		}
-		if _, err := ctrl.NotiService.Create("like", content, userID, uint(postID)); err != nil {
+		pid := uint(postID)
+		if _, err := ctrl.NotiService.Create("like", content, userID, post.UserID, &pid); err != nil {
 			log.Printf("Failed to create notification: %v", err)
 		}
 		utilities.SendWebSocketMessage(post.UserID, "notis")
@@ -98,7 +99,8 @@ func (ctrl *LikeController) LikeComment(c *echo.Context) error {
 			if user != nil {
 				content = user.Name + " liked a comment on your post"
 			}
-			if _, err := ctrl.NotiService.Create("like", content, userID, comment.PostID); err != nil {
+			pid := comment.PostID
+			if _, err := ctrl.NotiService.Create("like", content, userID, post.UserID, &pid); err != nil {
 				log.Printf("Failed to create notification: %v", err)
 			}
 			utilities.SendWebSocketMessage(post.UserID, "notis")
