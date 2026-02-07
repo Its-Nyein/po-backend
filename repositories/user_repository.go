@@ -24,6 +24,13 @@ func (r *UserRepository) GetAll(limit int) ([]models.User, error) {
 func (r *UserRepository) GetByID(id uint) (*models.User, error) {
 	var user models.User
 	err := r.DB.Preload("Followers").Preload("Following").
+		Preload("Posts", func(db *gorm.DB) *gorm.DB {
+			return db.Order("created_at DESC")
+		}).
+		Preload("Posts.User").
+		Preload("Posts.Comments.User").
+		Preload("Posts.Comments.Likes").
+		Preload("Posts.Likes").
 		First(&user, id).Error
 	if err != nil {
 		return nil, err

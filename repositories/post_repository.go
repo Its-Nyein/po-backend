@@ -56,6 +56,13 @@ func (r *PostRepository) GetByUserIDs(userIDs []uint, limit int) ([]models.Post,
 	return posts, err
 }
 
+func (r *PostRepository) Update(id uint, content string) (*models.Post, error) {
+	if err := r.DB.Model(&models.Post{}).Where("id = ?", id).Update("content", content).Error; err != nil {
+		return nil, err
+	}
+	return r.GetByID(id)
+}
+
 func (r *PostRepository) IsOwner(postID, userID uint) bool {
 	var post models.Post
 	err := r.DB.Where("id = ? AND user_id = ?", postID, userID).First(&post).Error

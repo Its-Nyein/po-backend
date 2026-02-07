@@ -32,6 +32,10 @@ func (s *PostService) Create(content string, userID uint) (*models.Post, error) 
 	return s.Repo.GetByID(post.ID)
 }
 
+func (s *PostService) Update(id uint, content string) (*models.Post, error) {
+	return s.Repo.Update(id, content)
+}
+
 func (s *PostService) Delete(id uint) error {
 	return s.Repo.Delete(id)
 }

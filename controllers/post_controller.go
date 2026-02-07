@@ -64,6 +64,32 @@ func (ctrl *PostController) CreatePost(c *echo.Context) error {
 	return c.JSON(http.StatusCreated, post)
 }
 
+func (ctrl *PostController) UpdatePost(c *echo.Context) error {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid post ID"})
+	}
+
+	var req dtos.UpdatePostRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+	}
+
+	if err := validation.ValidateStruct(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error":  "Validation failed",
+			"fields": validation.FormatValidationErrors(err),
+		})
+	}
+
+	post, err := ctrl.Service.Update(uint(id), req.Content)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, post)
+}
+
 func (ctrl *PostController) DeletePost(c *echo.Context) error {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {

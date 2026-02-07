@@ -19,6 +19,7 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	likeRepo := repositories.NewLikeRepository(db)
 	followRepo := repositories.NewFollowRepository(db)
 	notiRepo := repositories.NewNotificationRepository(db)
+	bookmarkRepo := repositories.NewBookmarkRepository(db)
 
 	userService := services.NewUserService(userRepo)
 	postService := services.NewPostService(postRepo)
@@ -26,6 +27,7 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	likeService := services.NewLikeService(likeRepo)
 	followService := services.NewFollowService(followRepo)
 	notiService := services.NewNotificationService(notiRepo)
+	bookmarkService := services.NewBookmarkService(bookmarkRepo)
 
 	userCtrl := controllers.NewUserController(userService)
 	postCtrl := controllers.NewPostController(postService, followService)
@@ -33,6 +35,7 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	likeCtrl := controllers.NewLikeController(likeService, postService, commentService, notiService, userService)
 	followCtrl := controllers.NewFollowController(followService, notiService, userService)
 	notiCtrl := controllers.NewNotificationController(notiService)
+	bookmarkCtrl := controllers.NewBookmarkController(bookmarkService)
 
 	api.GET("/users", userCtrl.GetUsers)
 	api.GET("/users/:id", userCtrl.GetUserByID)
@@ -49,9 +52,11 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	content.GET("/posts", postCtrl.GetAllPosts)
 	content.GET("/posts/:id", postCtrl.GetPostByID)
 	content.POST("/posts", postCtrl.CreatePost, middlewares.IsAuthenticated)
+	content.PUT("/posts/:id", postCtrl.UpdatePost, middlewares.IsAuthenticated, middlewares.IsPostOwner(postService))
 	content.DELETE("/posts/:id", postCtrl.DeletePost, middlewares.IsAuthenticated, middlewares.IsPostOwner(postService))
 
 	content.POST("/comments", commentCtrl.CreateComment, middlewares.IsAuthenticated)
+	content.PUT("/comments/:id", commentCtrl.UpdateComment, middlewares.IsAuthenticated, middlewares.IsCommentOwner(commentService))
 	content.DELETE("/comments/:id", commentCtrl.DeleteComment, middlewares.IsAuthenticated, middlewares.IsCommentOwner(commentService))
 
 	content.POST("/like/posts/:id", likeCtrl.LikePost, middlewares.IsAuthenticated)
@@ -66,6 +71,10 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	content.GET("/notis", notiCtrl.GetNotifications, middlewares.IsAuthenticated)
 	content.PUT("/notis/read", notiCtrl.MarkAllRead, middlewares.IsAuthenticated)
 	content.PUT("/notis/read/:id", notiCtrl.MarkOneRead, middlewares.IsAuthenticated)
+
+	content.GET("/bookmarks", bookmarkCtrl.GetBookmarks, middlewares.IsAuthenticated)
+	content.POST("/bookmarks/:id", bookmarkCtrl.CreateBookmark, middlewares.IsAuthenticated)
+	content.DELETE("/bookmarks/:id", bookmarkCtrl.DeleteBookmark, middlewares.IsAuthenticated)
 
 	api.GET("/ws/subscribe", controllers.HandleWebSocket)
 }

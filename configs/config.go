@@ -102,6 +102,7 @@ func (c *Config) InitializeDB() error {
 		&models.CommentLike{},
 		&models.Follow{},
 		&models.Notification{},
+		&models.Bookmark{},
 	); err != nil {
 		return err
 	}

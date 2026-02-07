@@ -25,6 +25,10 @@ func (s *CommentService) Create(content string, userID, postID uint) (*models.Co
 	return s.Repo.GetByID(comment.ID)
 }
 
+func (s *CommentService) Update(id uint, content string) (*models.Comment, error) {
+	return s.Repo.Update(id, content)
+}
+
 func (s *CommentService) Delete(id uint) error {
 	return s.Repo.Delete(id)
 }
