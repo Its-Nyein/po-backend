@@ -22,6 +22,7 @@ type Config struct {
 	DBName        string
 	DBUsername    string
 	DBPassword    string
+	DBSSLMode     string
 	RedisHost     string
 	RedisPort     string
 	RedisPassword string
@@ -53,6 +54,7 @@ func LoadConfig() *Config {
 		DBName:        getEnvOrDefault("DB_NAME", "po"),
 		DBUsername:    getEnvOrDefault("DB_USERNAME", "postgres"),
 		DBPassword:    getEnvOrDefault("DB_PASSWORD", "postgres"),
+		DBSSLMode:     getEnvOrDefault("DB_SSLMODE", "disable"),
 		RedisHost:     getEnvOrDefault("REDIS_HOST", "localhost"),
 		RedisPort:     getEnvOrDefault("REDIS_PORT", "6379"),
 		RedisPassword: getEnvOrDefault("REDIS_PASSWORD", ""),
@@ -62,8 +64,8 @@ func LoadConfig() *Config {
 }
 
 func (c *Config) ConnectDB() error {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		c.DBHost, c.DBPort, c.DBUsername, c.DBPassword, c.DBName)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		c.DBHost, c.DBPort, c.DBUsername, c.DBPassword, c.DBName, c.DBSSLMode)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
