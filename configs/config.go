@@ -28,6 +28,7 @@ type Config struct {
 	RedisPassword string
 	RedisDB       int
 	JWTSecret     string
+	CORSOrigin    string
 	DB            *gorm.DB
 	Redis         *redis.Client
 }
@@ -60,6 +61,7 @@ func LoadConfig() *Config {
 		RedisPassword: getEnvOrDefault("REDIS_PASSWORD", ""),
 		RedisDB:       redisDB,
 		JWTSecret:     getEnvOrDefault("JWT_SECRET", "your-secret-key"),
+		CORSOrigin:    getEnvOrDefault("CORS_ORIGIN", "http://localhost:5173"),
 	}
 }
 
