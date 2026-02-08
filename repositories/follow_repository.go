@@ -25,6 +25,15 @@ func (r *FollowRepository) Unfollow(followerID, followingID uint) error {
 		Delete(&models.Follow{}).Error
 }
 
+func (r *FollowRepository) GetFollowingUsers(userID uint) ([]models.User, error) {
+	var users []models.User
+	err := r.DB.
+		Joins("JOIN follows ON follows.following_id = users.id").
+		Where("follows.follower_id = ?", userID).
+		Find(&users).Error
+	return users, err
+}
+
 func (r *FollowRepository) GetFollowingIDs(userID uint) ([]uint, error) {
 	var follows []models.Follow
 	err := r.DB.Where("follower_id = ?", userID).Find(&follows).Error

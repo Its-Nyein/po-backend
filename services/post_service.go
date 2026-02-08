@@ -21,10 +21,11 @@ func (s *PostService) GetByID(id uint) (*models.Post, error) {
 	return s.Repo.GetByID(id)
 }
 
-func (s *PostService) Create(content string, userID uint) (*models.Post, error) {
+func (s *PostService) Create(content string, userID uint, quotedPostID *uint) (*models.Post, error) {
 	post := &models.Post{
-		Content: content,
-		UserID:  userID,
+		Content:      content,
+		UserID:       userID,
+		QuotedPostID: quotedPostID,
 	}
 	if err := s.Repo.Create(post); err != nil {
 		return nil, err

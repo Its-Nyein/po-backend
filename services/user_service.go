@@ -61,6 +61,10 @@ func (s *UserService) Login(username, password string) (*models.User, string, er
 	return user, token, nil
 }
 
+func (s *UserService) GetByUsername(username string) (*models.User, error) {
+	return s.Repo.GetByUsername(username)
+}
+
 func (s *UserService) Search(query string) ([]models.User, error) {
 	return s.Repo.Search(query, 20)
 }

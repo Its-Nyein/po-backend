@@ -20,6 +20,7 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	followRepo := repositories.NewFollowRepository(db)
 	notiRepo := repositories.NewNotificationRepository(db)
 	bookmarkRepo := repositories.NewBookmarkRepository(db)
+	hashtagRepo := repositories.NewHashtagRepository(db)
 
 	userService := services.NewUserService(userRepo)
 	postService := services.NewPostService(postRepo)
@@ -28,22 +29,26 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	followService := services.NewFollowService(followRepo)
 	notiService := services.NewNotificationService(notiRepo)
 	bookmarkService := services.NewBookmarkService(bookmarkRepo)
+	hashtagService := services.NewHashtagService(hashtagRepo)
 
 	userCtrl := controllers.NewUserController(userService)
-	postCtrl := controllers.NewPostController(postService, followService)
+	postCtrl := controllers.NewPostController(postService, followService, hashtagService, notiService, userService)
 	commentCtrl := controllers.NewCommentController(commentService, postService, notiService, userService)
 	likeCtrl := controllers.NewLikeController(likeService, postService, commentService, notiService, userService)
 	followCtrl := controllers.NewFollowController(followService, notiService, userService)
 	notiCtrl := controllers.NewNotificationController(notiService)
 	bookmarkCtrl := controllers.NewBookmarkController(bookmarkService)
+	hashtagCtrl := controllers.NewHashtagController(hashtagService)
 
 	api.GET("/users", userCtrl.GetUsers)
 	api.GET("/users/:id", userCtrl.GetUserByID)
+	api.GET("/users/username/:username", userCtrl.GetUserByUsername)
 	api.POST("/users", userCtrl.RegisterUser)
 	api.POST("/login", userCtrl.LoginUser)
 	api.GET("/verify", userCtrl.VerifyToken, middlewares.IsAuthenticated)
 	api.GET("/search", userCtrl.SearchUsers)
 
+	api.GET("/following/users", followCtrl.GetFollowingUsers, middlewares.IsAuthenticated)
 	api.POST("/follow/:id", followCtrl.FollowUser, middlewares.IsAuthenticated)
 	api.DELETE("/unfollow/:id", followCtrl.UnfollowUser, middlewares.IsAuthenticated)
 
@@ -65,6 +70,9 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	content.DELETE("/unlike/comments/:id", likeCtrl.UnlikeComment, middlewares.IsAuthenticated)
 	content.GET("/likes/posts/:id", likeCtrl.GetPostLikers)
 	content.GET("/likes/comments/:id", likeCtrl.GetCommentLikers)
+
+	content.GET("/hashtags/:tag/posts", hashtagCtrl.GetPostsByHashtag, middlewares.IsAuthenticated)
+	content.GET("/hashtags/trending", hashtagCtrl.GetTrending, middlewares.IsAuthenticated)
 
 	content.GET("/following/posts", postCtrl.GetFollowingPosts, middlewares.IsAuthenticated)
 

@@ -31,6 +31,7 @@ func (r *UserRepository) GetByID(id uint) (*models.User, error) {
 		Preload("Posts.Comments.User").
 		Preload("Posts.Comments.Likes").
 		Preload("Posts.Likes").
+		Preload("Posts.QuotedPost.User").
 		First(&user, id).Error
 	if err != nil {
 		return nil, err

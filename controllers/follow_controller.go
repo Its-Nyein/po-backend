@@ -29,6 +29,15 @@ func NewFollowController(
 	}
 }
 
+func (ctrl *FollowController) GetFollowingUsers(c *echo.Context) error {
+	userID := c.Get("userID").(uint)
+	users, err := ctrl.Service.GetFollowingUsers(userID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, users)
+}
+
 func (ctrl *FollowController) FollowUser(c *echo.Context) error {
 	followingID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {

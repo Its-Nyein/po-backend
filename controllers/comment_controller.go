@@ -67,7 +67,30 @@ func (ctrl *CommentController) CreateComment(c *echo.Context) error {
 		utilities.SendWebSocketMessage(post.UserID, "notis")
 	}
 
+	ctrl.processMentions(req.Content, userID, req.PostID)
+
 	return c.JSON(http.StatusCreated, comment)
+}
+
+func (ctrl *CommentController) processMentions(content string, actorID uint, postID uint) {
+	usernames := utilities.ParseMentions(content)
+	actor, _ := ctrl.UserService.GetByID(actorID)
+
+	for _, username := range usernames {
+		mentioned, err := ctrl.UserService.GetByUsername(username)
+		if err != nil || mentioned.ID == actorID {
+			continue
+		}
+		notiContent := "mentioned you in a comment"
+		if actor != nil {
+			notiContent = actor.Name + " mentioned you in a comment"
+		}
+		pid := postID
+		if _, err := ctrl.NotiService.Create("mention", notiContent, actorID, mentioned.ID, &pid); err != nil {
+			log.Printf("Failed to create mention notification: %v", err)
+		}
+		utilities.SendWebSocketMessage(mentioned.ID, "notis")
+	}
 }
 
 func (ctrl *CommentController) UpdateComment(c *echo.Context) error {

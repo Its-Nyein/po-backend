@@ -103,6 +103,8 @@ func (c *Config) InitializeDB() error {
 		&models.Follow{},
 		&models.Notification{},
 		&models.Bookmark{},
+		&models.Hashtag{},
+		&models.PostHashtag{},
 	); err != nil {
 		return err
 	}

@@ -95,6 +95,15 @@ func (ctrl *UserController) VerifyToken(c *echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+func (ctrl *UserController) GetUserByUsername(c *echo.Context) error {
+	username := c.Param("username")
+	user, err := ctrl.Service.GetByUsername(username)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+	}
+	return c.JSON(http.StatusOK, user)
+}
+
 func (ctrl *UserController) SearchUsers(c *echo.Context) error {
 	query := c.QueryParam("q")
 	users, err := ctrl.Service.Search(query)
