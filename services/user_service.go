@@ -68,3 +68,43 @@ func (s *UserService) GetByUsername(username string) (*models.User, error) {
 func (s *UserService) Search(query string) ([]models.User, error) {
 	return s.Repo.Search(query, 20)
 }
+
+func (s *UserService) UpdateProfile(userID uint, name, username, bio string) (*models.User, error) {
+	user, err := s.Repo.GetByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Name = name
+	user.Username = username
+	user.Bio = bio
+
+	if err := s.Repo.Update(user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (s *UserService) ChangePassword(userID uint, oldPassword, newPassword string) error {
+	user, err := s.Repo.GetByID(userID)
+	if err != nil {
+		return err
+	}
+
+	if !helper.CheckPasswordHash(oldPassword, user.Password) {
+		return errors.New("incorrect old password")
+	}
+
+	hashedPassword, err := helper.HashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+
+	user.Password = hashedPassword
+	return s.Repo.Update(user)
+}
+
+func (s *UserService) DeleteAccount(userID uint) error {
+	return s.Repo.Delete(userID)
+}

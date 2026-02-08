@@ -112,3 +112,55 @@ func (ctrl *UserController) SearchUsers(c *echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, users)
 }
+
+func (ctrl *UserController) UpdateProfile(c *echo.Context) error {
+	var req dtos.UpdateProfileRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+	}
+
+	if err := validation.ValidateStruct(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error":  "Validation failed",
+			"fields": validation.FormatValidationErrors(err),
+		})
+	}
+
+	userID := c.Get("userID").(uint)
+	user, err := ctrl.Service.UpdateProfile(userID, req.Name, req.Username, req.Bio)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, user)
+}
+
+func (ctrl *UserController) ChangePassword(c *echo.Context) error {
+	var req dtos.ChangePasswordRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
+	}
+
+	if err := validation.ValidateStruct(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error":  "Validation failed",
+			"fields": validation.FormatValidationErrors(err),
+		})
+	}
+
+	userID := c.Get("userID").(uint)
+	if err := ctrl.Service.ChangePassword(userID, req.OldPassword, req.NewPassword); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Password changed successfully"})
+}
+
+func (ctrl *UserController) DeleteAccount(c *echo.Context) error {
+	userID := c.Get("userID").(uint)
+	if err := ctrl.Service.DeleteAccount(userID); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Account deleted successfully"})
+}

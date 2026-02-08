@@ -16,3 +16,14 @@ type LoginResponse struct {
 	Token string      `json:"token"`
 	User  interface{} `json:"user"`
 }
+
+type UpdateProfileRequest struct {
+	Name     string `json:"name" validate:"required"`
+	Username string `json:"username" validate:"required"`
+	Bio      string `json:"bio"`
+}
+
+type ChangePasswordRequest struct {
+	OldPassword string `json:"oldPassword" validate:"required"`
+	NewPassword string `json:"newPassword" validate:"required,min=6"`
+}

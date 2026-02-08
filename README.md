@@ -103,6 +103,9 @@ All routes are prefixed with `/api/v1`.
 | GET    | `/users/:id`                   | No   | Get user by ID            |
 | GET    | `/users/username/:username`    | No   | Get user by username      |
 | GET    | `/search?q=`                   | No   | Search users by name      |
+| PUT    | `/users/profile`               | Yes  | Update profile            |
+| PUT    | `/users/password`              | Yes  | Change password           |
+| DELETE | `/users/account`               | Yes  | Delete account            |
 
 ### Follow
 
@@ -186,6 +189,7 @@ All routes are prefixed with `/api/v1`.
 - **Real-time notifications** via WebSocket for likes, comments, follows, reposts, and mentions
 - **Follow system** with follower/following feeds
 - **Ownership middleware** ensures only authors can edit/delete their content
+- **Account settings** — edit profile, change password, and delete account with cascading data cleanup
 
 ## CORS
 

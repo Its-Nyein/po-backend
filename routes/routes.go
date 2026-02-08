@@ -47,6 +47,9 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	api.POST("/login", userCtrl.LoginUser)
 	api.GET("/verify", userCtrl.VerifyToken, middlewares.IsAuthenticated)
 	api.GET("/search", userCtrl.SearchUsers)
+	api.PUT("/users/profile", userCtrl.UpdateProfile, middlewares.IsAuthenticated)
+	api.PUT("/users/password", userCtrl.ChangePassword, middlewares.IsAuthenticated)
+	api.DELETE("/users/account", userCtrl.DeleteAccount, middlewares.IsAuthenticated)
 
 	api.GET("/following/users", followCtrl.GetFollowingUsers, middlewares.IsAuthenticated)
 	api.POST("/follow/:id", followCtrl.FollowUser, middlewares.IsAuthenticated)
