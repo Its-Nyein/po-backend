@@ -31,6 +31,28 @@ func IsPostOwner(postService *services.PostService) echo.MiddlewareFunc {
 	}
 }
 
+func IsStoryOwner(storyService *services.StoryService) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c *echo.Context) error {
+			userID := c.Get("userID").(uint)
+			storyID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+			if err != nil {
+				return c.JSON(http.StatusBadRequest, map[string]string{
+					"error": "Invalid story ID",
+				})
+			}
+
+			if !storyService.IsOwner(uint(storyID), userID) {
+				return c.JSON(http.StatusForbidden, map[string]string{
+					"error": "You are not the owner of this story",
+				})
+			}
+
+			return next(c)
+		}
+	}
+}
+
 func IsCommentOwner(commentService *services.CommentService) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) error {

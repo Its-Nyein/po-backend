@@ -21,6 +21,7 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	notiRepo := repositories.NewNotificationRepository(db)
 	bookmarkRepo := repositories.NewBookmarkRepository(db)
 	hashtagRepo := repositories.NewHashtagRepository(db)
+	storyRepo := repositories.NewStoryRepository(db)
 
 	userService := services.NewUserService(userRepo)
 	postService := services.NewPostService(postRepo)
@@ -30,6 +31,7 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	notiService := services.NewNotificationService(notiRepo)
 	bookmarkService := services.NewBookmarkService(bookmarkRepo)
 	hashtagService := services.NewHashtagService(hashtagRepo)
+	storyService := services.NewStoryService(storyRepo, followRepo)
 
 	userCtrl := controllers.NewUserController(userService)
 	postCtrl := controllers.NewPostController(postService, followService, hashtagService, notiService, userService)
@@ -39,6 +41,7 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	notiCtrl := controllers.NewNotificationController(notiService)
 	bookmarkCtrl := controllers.NewBookmarkController(bookmarkService)
 	hashtagCtrl := controllers.NewHashtagController(hashtagService)
+	storyCtrl := controllers.NewStoryController(storyService, followService)
 
 	api.GET("/users", userCtrl.GetUsers)
 	api.GET("/users/:id", userCtrl.GetUserByID)
@@ -86,6 +89,13 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	content.GET("/bookmarks", bookmarkCtrl.GetBookmarks, middlewares.IsAuthenticated)
 	content.POST("/bookmarks/:id", bookmarkCtrl.CreateBookmark, middlewares.IsAuthenticated)
 	content.DELETE("/bookmarks/:id", bookmarkCtrl.DeleteBookmark, middlewares.IsAuthenticated)
+
+	content.POST("/stories", storyCtrl.CreateStory, middlewares.IsAuthenticated)
+	content.DELETE("/stories/:id", storyCtrl.DeleteStory, middlewares.IsAuthenticated, middlewares.IsStoryOwner(storyService))
+	content.GET("/stories/feed", storyCtrl.GetFeedStories, middlewares.IsAuthenticated)
+	content.GET("/stories/user/:id", storyCtrl.GetUserStories, middlewares.IsAuthenticated)
+	content.POST("/stories/:id/view", storyCtrl.RecordView, middlewares.IsAuthenticated)
+	content.GET("/stories/:id/viewers", storyCtrl.GetViewers, middlewares.IsAuthenticated, middlewares.IsStoryOwner(storyService))
 
 	api.GET("/ws/subscribe", controllers.HandleWebSocket)
 }

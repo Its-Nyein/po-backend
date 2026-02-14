@@ -28,3 +28,7 @@ func (s *FollowService) GetFollowingUsers(userID uint) ([]models.User, error) {
 func (s *FollowService) GetFollowingIDs(userID uint) ([]uint, error) {
 	return s.Repo.GetFollowingIDs(userID)
 }
+
+func (s *FollowService) GetFollowerIDs(userID uint) ([]uint, error) {
+	return s.Repo.GetFollowerIDs(userID)
+}

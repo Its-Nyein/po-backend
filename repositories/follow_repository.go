@@ -46,3 +46,16 @@ func (r *FollowRepository) GetFollowingIDs(userID uint) ([]uint, error) {
 	}
 	return ids, nil
 }
+
+func (r *FollowRepository) GetFollowerIDs(userID uint) ([]uint, error) {
+	var follows []models.Follow
+	err := r.DB.Where("following_id = ?", userID).Find(&follows).Error
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]uint, len(follows))
+	for i, f := range follows {
+		ids[i] = f.FollowerID
+	}
+	return ids, nil
+}

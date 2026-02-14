@@ -109,6 +109,8 @@ func (c *Config) InitializeDB() error {
 		&models.Bookmark{},
 		&models.Hashtag{},
 		&models.PostHashtag{},
+		&models.Story{},
+		&models.StoryView{},
 	); err != nil {
 		return err
 	}

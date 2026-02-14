@@ -3,8 +3,10 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"po-backend/configs"
+	"po-backend/repositories"
 	"po-backend/routes"
 
 	"github.com/labstack/echo/v5"
@@ -35,6 +37,18 @@ func main() {
 	if err := cfg.InitializeDB(); err != nil {
 		log.Fatal("Failed to run migrations:", err)
 	}
+
+	go func() {
+		storyRepo := repositories.NewStoryRepository(cfg.DB)
+		for {
+			time.Sleep(1 * time.Hour)
+			if err := storyRepo.DeleteExpired(); err != nil {
+				log.Printf("Expired stories cleanup error: %v", err)
+			} else {
+				log.Println("Expired stories cleanup completed")
+			}
+		}
+	}()
 
 	e.GET("/", func(c *echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"message": "Po API is running"})
