@@ -7,35 +7,59 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type Client struct {
+	Conn   *websocket.Conn
+	Send   chan []byte
+	UserID uint
+}
+
 type WebSocketManager struct {
-	Clients map[uint]*websocket.Conn
+	Clients map[uint]*Client
 	Mu      sync.RWMutex
 }
 
 var WSManager = &WebSocketManager{
-	Clients: make(map[uint]*websocket.Conn),
+	Clients: make(map[uint]*Client),
 }
 
-func (m *WebSocketManager) AddClient(userID uint, conn *websocket.Conn) {
+func (m *WebSocketManager) AddClient(userID uint, client *Client) {
 	m.Mu.Lock()
 	defer m.Mu.Unlock()
-	m.Clients[userID] = conn
+	if existing, ok := m.Clients[userID]; ok {
+		close(existing.Send)
+	}
+	m.Clients[userID] = client
 }
 
 func (m *WebSocketManager) RemoveClient(userID uint) {
 	m.Mu.Lock()
 	defer m.Mu.Unlock()
-	if conn, ok := m.Clients[userID]; ok {
-		if err := conn.Close(); err != nil {
+	if client, ok := m.Clients[userID]; ok {
+		close(client.Send)
+		if err := client.Conn.Close(); err != nil {
 			log.Printf("Error closing websocket: %v", err)
 		}
 		delete(m.Clients, userID)
 	}
 }
 
-func (m *WebSocketManager) GetClient(userID uint) (*websocket.Conn, bool) {
+func (m *WebSocketManager) UnregisterClient(userID uint, client *Client) {
+	m.Mu.Lock()
+	defer m.Mu.Unlock()
+	current, ok := m.Clients[userID]
+	if !ok || current != client {
+		return
+	}
+	close(client.Send)
+	if err := client.Conn.Close(); err != nil {
+		log.Printf("Error closing websocket: %v", err)
+	}
+	delete(m.Clients, userID)
+}
+
+func (m *WebSocketManager) GetClient(userID uint) (*Client, bool) {
 	m.Mu.RLock()
 	defer m.Mu.RUnlock()
-	conn, ok := m.Clients[userID]
-	return conn, ok
+	client, ok := m.Clients[userID]
+	return client, ok
 }

@@ -111,6 +111,9 @@ func (c *Config) InitializeDB() error {
 		&models.PostHashtag{},
 		&models.Story{},
 		&models.StoryView{},
+		&models.Conversation{},
+		&models.ConversationParticipant{},
+		&models.Message{},
 	); err != nil {
 		return err
 	}

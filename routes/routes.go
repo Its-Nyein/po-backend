@@ -22,6 +22,8 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	bookmarkRepo := repositories.NewBookmarkRepository(db)
 	hashtagRepo := repositories.NewHashtagRepository(db)
 	storyRepo := repositories.NewStoryRepository(db)
+	convRepo := repositories.NewConversationRepository(db)
+	msgRepo := repositories.NewMessageRepository(db)
 
 	userService := services.NewUserService(userRepo)
 	postService := services.NewPostService(postRepo)
@@ -32,6 +34,7 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	bookmarkService := services.NewBookmarkService(bookmarkRepo)
 	hashtagService := services.NewHashtagService(hashtagRepo)
 	storyService := services.NewStoryService(storyRepo, followRepo)
+	convService := services.NewConversationService(convRepo, msgRepo, followRepo)
 
 	userCtrl := controllers.NewUserController(userService)
 	postCtrl := controllers.NewPostController(postService, followService, hashtagService, notiService, userService)
@@ -42,6 +45,7 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	bookmarkCtrl := controllers.NewBookmarkController(bookmarkService)
 	hashtagCtrl := controllers.NewHashtagController(hashtagService)
 	storyCtrl := controllers.NewStoryController(storyService, followService)
+	convCtrl := controllers.NewConversationController(convService)
 
 	api.GET("/users", userCtrl.GetUsers)
 	api.GET("/users/:id", userCtrl.GetUserByID)
@@ -98,6 +102,14 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	content.GET("/stories/user/:id", storyCtrl.GetUserStories, middlewares.IsAuthenticated)
 	content.POST("/stories/:id/view", storyCtrl.RecordView, middlewares.IsAuthenticated)
 	content.GET("/stories/:id/viewers", storyCtrl.GetViewers, middlewares.IsAuthenticated, middlewares.IsStoryOwner(storyService))
+
+	content.GET("/conversations", convCtrl.GetConversations, middlewares.IsAuthenticated)
+	content.POST("/conversations", convCtrl.CreateConversation, middlewares.IsAuthenticated)
+	content.GET("/conversations/unread", convCtrl.GetUnreadCount, middlewares.IsAuthenticated)
+	content.GET("/conversations/can-message/:id", convCtrl.CheckMutualFollow, middlewares.IsAuthenticated)
+	content.GET("/conversations/:id/messages", convCtrl.GetMessages, middlewares.IsAuthenticated)
+	content.POST("/conversations/:id/messages", convCtrl.SendMessage, middlewares.IsAuthenticated)
+	content.PUT("/conversations/:id/read", convCtrl.MarkRead, middlewares.IsAuthenticated)
 
 	api.GET("/ws/subscribe", controllers.HandleWebSocket)
 }
