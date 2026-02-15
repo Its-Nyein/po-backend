@@ -38,6 +38,30 @@ func (ctrl *FollowController) GetFollowingUsers(c *echo.Context) error {
 	return c.JSON(http.StatusOK, users)
 }
 
+func (ctrl *FollowController) GetFollowersByUserID(c *echo.Context) error {
+	userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+	}
+	users, err := ctrl.Service.GetFollowerUsers(uint(userID))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, users)
+}
+
+func (ctrl *FollowController) GetFollowingByUserID(c *echo.Context) error {
+	userID, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+	}
+	users, err := ctrl.Service.GetFollowingUsers(uint(userID))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, users)
+}
+
 func (ctrl *FollowController) FollowUser(c *echo.Context) error {
 	followingID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {

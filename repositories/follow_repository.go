@@ -28,8 +28,19 @@ func (r *FollowRepository) Unfollow(followerID, followingID uint) error {
 func (r *FollowRepository) GetFollowingUsers(userID uint) ([]models.User, error) {
 	var users []models.User
 	err := r.DB.
+		Preload("Followers").
 		Joins("JOIN follows ON follows.following_id = users.id").
 		Where("follows.follower_id = ?", userID).
+		Find(&users).Error
+	return users, err
+}
+
+func (r *FollowRepository) GetFollowerUsers(userID uint) ([]models.User, error) {
+	var users []models.User
+	err := r.DB.
+		Preload("Followers").
+		Joins("JOIN follows ON follows.follower_id = users.id").
+		Where("follows.following_id = ?", userID).
 		Find(&users).Error
 	return users, err
 }

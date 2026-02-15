@@ -55,6 +55,8 @@ func InitializeRoutes(e *echo.Echo, db *gorm.DB) {
 	api.DELETE("/users/account", userCtrl.DeleteAccount, middlewares.IsAuthenticated)
 
 	api.GET("/following/users", followCtrl.GetFollowingUsers, middlewares.IsAuthenticated)
+	api.GET("/users/:id/followers", followCtrl.GetFollowersByUserID)
+	api.GET("/users/:id/following", followCtrl.GetFollowingByUserID)
 	api.POST("/follow/:id", followCtrl.FollowUser, middlewares.IsAuthenticated)
 	api.DELETE("/unfollow/:id", followCtrl.UnfollowUser, middlewares.IsAuthenticated)
 
